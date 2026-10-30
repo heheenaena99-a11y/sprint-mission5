@@ -1,24 +1,31 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cn } from "cn";
 
-import { AppTabBar } from "@/components/app-tab-bar";
 import { DeviceFrame } from "@/components/device-frame";
 import { Pill } from "@/components/pill";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { PreviewBar } from "@/components/preview-bar";
 import { findDeviceBySlug, getDevices } from "@/lib/repository";
 
 /**
- * 틀 하나를 화면 폭에 맞게 최대한 크게 — 구간별 고정 비율(--s), 자바스크립트 없음.
- * 각 구간의 가장 좁은 폭에서 여백·테두리를 빼고도 넘치지 않는 값. 폰은 실제 크기(×1)까지만.
+ * 기기별 단독 보기 규칙
+ * - stage: 틀 배율 (globals.css 의 stage-* — 폭·높이 미디어쿼리 단계별, 최대 ×1.4)
+ * - fullscreen: 이 구간에서는 틀 없이 남은 화면 전체 (위 막대·알약 줄 제외)
+ * - mainFull: 틀 없는 구간에서 무대 여백 없애기
  */
-const scaleClassName: Record<string, string> = {
-  "fold-folded": "[--s:0.6] sm:[--s:1]",
-  "fold-unfolded":
-    "[--s:0.3] sm:[--s:0.58] md:[--s:0.72] lg:[--s:0.95] xl:[--s:1]",
-  pc: "[--s:0.21] sm:[--s:0.39] md:[--s:0.48] lg:[--s:0.63] xl:[--s:0.8] 2xl:[--s:0.97]",
-};
+const stage = {
+  "fold-folded": {
+    stage: "stage-fold-folded",
+    fullscreen: "below-sm",
+    mainFull: "max-sm:p-0",
+  },
+  "fold-unfolded": {
+    stage: "stage-fold-unfolded",
+    fullscreen: "below-lg",
+    mainFull: "max-lg:p-0",
+  },
+  pc: { stage: "stage-pc", fullscreen: "lg-up", mainFull: "lg:p-0" },
+} as const;
 
 export function generateStaticParams() {
   return getDevices().map((device) => ({ device: device.slug }));
@@ -40,54 +47,53 @@ export async function generateMetadata({
   };
 }
 
+/** 전시용 화면 — 화면 높이에 고정, 바깥은 스크롤 없이 iframe 안에서만 스크롤 */
 export default async function DevicePreviewPage({
   params,
 }: PageProps<"/preview/[device]">) {
   const { device: slug } = await params;
   const device = findDeviceBySlug(slug);
 
-  if (!device) notFound();
+  if (!device || !(device.slug in stage)) notFound();
+
+  const rule = stage[device.slug as keyof typeof stage];
 
   return (
-    <>
-      <SiteHeader />
-      <main className="flex flex-1 flex-col items-center gap-8 bg-canvas px-5 py-6 sm:px-9 sm:py-8 lg:px-12 lg:py-10">
-        <div className="flex w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link
-            href="/preview"
-            className="text-[15px] font-bold text-primary hover:underline"
+    <div className="flex h-dvh flex-col overflow-hidden bg-canvas">
+      <PreviewBar />
+      <nav
+        aria-label="기기 선택"
+        className="flex h-12 shrink-0 items-center gap-2 overflow-x-auto border-b border-border bg-white px-4 sm:justify-center sm:px-6"
+      >
+        {getDevices().map((item) => (
+          <Pill
+            key={item.slug}
+            href={`/preview/${item.slug}`}
+            selected={item.slug === device.slug}
+            tone="brand"
+            className="shrink-0 px-3.5 py-1.5 text-[13px] leading-[1.2]"
           >
-            ←&nbsp;&nbsp;전체 보기
-          </Link>
-          <nav
-            aria-label="기기 선택"
-            className="-mx-5 flex w-[calc(100%+2.5rem)] gap-2 overflow-x-auto px-5 sm:mx-0 sm:w-auto sm:px-0"
-          >
-            {getDevices().map((item) => (
-              <Pill
-                key={item.slug}
-                href={`/preview/${item.slug}`}
-                selected={item.slug === device.slug}
-                tone="brand"
-                className="shrink-0 px-4 py-2 text-sm leading-[1.2]"
-              >
-                {item.name}
-              </Pill>
-            ))}
-          </nav>
-        </div>
+            {item.name}
+          </Pill>
+        ))}
+      </nav>
 
+      <main
+        className={cn(
+          "flex min-h-0 flex-1 items-center justify-center overflow-auto p-4",
+          rule.mainFull,
+        )}
+      >
         <DeviceFrame
           kind={device.kind}
           width={device.width}
           height={device.height}
-          scaleClassName={scaleClassName[device.slug]}
+          scaleClassName={rule.stage}
+          fullscreen={rule.fullscreen}
           name={device.name}
           title={`리스크노트 홈 — ${device.name} 크게 보기`}
         />
       </main>
-      <SiteFooter />
-      <AppTabBar />
-    </>
+    </div>
   );
 }
