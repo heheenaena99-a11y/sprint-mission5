@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 리스크노트 — 위험성평가 작성 도우미
 
-## Getting Started
+> 스프린트 미션5 과제용 **가상 서비스**입니다. 실제 저장·로그인 기능은 없고, 화면 속 평가와 계정은 모두 예시(가짜) 데이터입니다.
 
-First, run the development server:
+## 1. 서비스 소개
+
+5~50인 소규모 사업장 관리자가 위험성평가를 단계별로 작성하고, 작성한 평가를 한곳에서 관리하도록 돕는 서비스의 랜딩·UI입니다.
+
+| 문제 | 해결 | 기대효과 |
+|---|---|---|
+| 엑셀·종이 양식이 어렵고, 작성한 기록이 여기저기 흩어진다 | 법정 절차 순서대로 이어지는 단계별 화면에서 작성한다 | 작성 시간 단축, 평가 기록을 한곳에서 관리 |
+
+- **타깃:** 5~50인 사업장의 안전 담당 관리자·사업주
+- **핵심 CTA:** "위험성평가 시작하기" → `/assessments/new`
+
+## 2. 배포 주소
+
+- 서비스: https://risknote.vercel.app
+- 기기별 한 번에 보기: https://risknote.vercel.app/preview
+
+## 3. 페이지 구성
+
+| 주소 | 화면 |
+|---|---|
+| `/` | 랜딩 |
+| `/assessments` | 평가 목록 |
+| `/assessments/[id]` | 평가 상세 (1~7) |
+| `/assessments/new` | 새 평가 작성 |
+| `/login` | 로그인 |
+| `/signup` | 회원가입 |
+| `/preview` | 기기별 미리보기 |
+| `/preview/[device]` | 기기별 단독 보기 (`fold-folded`, `fold-unfolded`, `pc`) |
+
+## 4. 기술 스택
+
+| 분류 | 사용 기술 (설치 버전) |
+|---|---|
+| 프레임워크 | Next.js 16.4.3 (App Router, Cache Components), React 19.3.0 |
+| 언어 | TypeScript 5.9.3 |
+| 스타일 | Tailwind CSS 4.3.3 |
+| UI 컴포넌트 | shadcn/ui (shadcn 4.23.0, Base UI 1.9.0), 아이콘 lucide-react 1.64.0 |
+| 글꼴 | IBM Plex Sans KR (`next/font/google`) |
+| 코드 정리 | Prettier 3.9.10, ESLint 9.39.5 |
+| 배포 | Vercel |
+
+## 5. 구현한 인터랙션
+
+모든 인터랙션은 **클라이언트 자바스크립트 없이 링크(`next/link`, `<a>`)와 CSS만으로** 구현했습니다.
+
+- **페이지 이동:** 버튼·링크를 누르면 해당 페이지로 이동합니다. 필터·열고 닫기·저장처럼 실제 동작이 필요한 부분은 모양만 만들었습니다.
+- **업종 알약:** 알약을 누르면 주소가 `/?industry=manufacturing#overview`처럼 바뀌고, 서버가 그 값을 읽어 아래 예시 카드(제목·설명·위험요인 3줄·상세 링크)를 해당 업종의 평가로 바꿉니다.
+- **바로가기 메뉴:** 섹션 앵커(`#overview` 등)로 이동하고, CSS `position: sticky`로 스크롤할 때 화면 위에 붙어 따라옵니다. `scroll-margin`으로 섹션 제목이 메뉴에 가려지지 않게 했습니다.
+- **폴드8 앱 탭 바:** 1023px 이하에서 화면 아래에 고정되는 4개 탭(홈 · 평가 목록 · 새 평가 · 로그인)입니다. 현재 탭은 각 페이지가 `active` 값을 넘겨 표시하고, 안전 영역(`env(safe-area-inset-bottom)`)만큼 여백을 둡니다.
+- **기기별 미리보기:** `/preview`에서 같은 주소(`/`)를 폴드8 접은 화면·펼친 화면·PC 크기의 `iframe` 틀로 동시에 보여줍니다. iframe은 원래 크기로 두고 CSS `transform: scale()`로 줄이며, 축소 비율은 화면 폭 구간마다 고정값을 씁니다. 틀 안에서 스크롤하고 누를 수 있고, "이 화면만 크게 보기 →"로 `/preview/[device]` 단독 화면에 갈 수 있습니다.
+
+## 6. 반응형
+
+| 화면 폭 | 기준 기기 | 화면 모양 |
+|---|---|---|
+| 640px 미만 | 갤럭시 Z 폴드8 접은 화면 (475×605) | 앱 제목줄 + 아래 탭 바, 1열, 꽉 찬 폭 버튼 |
+| 640~1023px | 갤럭시 Z 폴드8 펼친 화면 (932×560) | 앱 제목줄 + 아래 탭 바, 2~3열 |
+| 1024px 이상 | 데스크톱 | 웹 헤더·푸터, 넓은 섹션 레이아웃 |
+
+## 7. 디자인
+
+- Figma 시안: https://www.figma.com/design/9RPPVsUGQPFUyCSj9Wd4gX (03 Slack 스타일, 04 앱 (폴드8) 페이지)
+- Figma 시안의 **"03 Slack 스타일"(데스크톱)**과 **"04 앱 (폴드8)"(앱 화면)** 페이지를 기준으로 구현했습니다.
+- Figma MCP로 각 화면의 구조·여백·글자 크기를 읽어 구현 맥락으로 전달했습니다.
+- **색 선택 이유:** 안전보건표지의 색 의미를 따랐습니다.
+  - 빨강·노랑·초록 → 위험등급 (높음 16~25 / 보통 9~15 / 낮음 1~8, 위험도 = 빈도 × 강도)
+  - 파랑(`#1D4ED8`) → '지시'를 뜻하는 색이라, 버튼·링크·강조에 쓰는 주색으로 정했습니다.
+
+## 8. 데이터 구조
+
+| 파일 | 역할 |
+|---|---|
+| `lib/types.ts` | 타입 모음: `userDataType`(비밀번호 포함, 저장용), `userClientType`(비밀번호 제외, 화면용), `assessmentType`, `hazardType`, `riskLevelType`, `industryType`, `deviceType` |
+| `lib/data.ts` | 가짜 데이터: 사용자 2명, 평가 7건, 업종 연결표, 미리보기 기기 목록 |
+| `lib/repository.ts` | 찾기: `findAssessmentById`, `filterAssessmentsByLevel`, `getDemoUser` 등 (`find`·`filter` 사용, 없으면 `null`) |
+| `lib/service.ts` | 계산: 위험도(빈도 × 강도), 등급, 최고 위험도, 등급 분포, 위험요인 수 |
+
+로그인 화면의 체험 계정 안내는 비밀번호를 뺀 `userClientType`으로 보여주고, 공개용 체험 비밀번호는 `demoPassword` 상수로 따로 둡니다.
+
+## 9. AI 결과를 검토·수정한 기록
+
+AI(Claude Code)가 만든 결과를 확인하고 다음과 같이 고쳤습니다.
+
+- **동작 없는 `<button>`:** 업종 알약·FAQ 항목·목록 필터가 눌러도 아무 일이 없는 버튼이어서 일반 요소(`span`, `div`)로 바꿨습니다. 업종 알약은 이후 실제 링크로 바꿨습니다.
+- **아이콘 `alt` 누락:** 기능 아이콘의 `alt`가 비어 있어서 "위험도 자동 계산 아이콘"처럼 채웠습니다.
+- **입력칸 테두리 색 대비:** 선 색과 같은 옅은 테두리 대신, 시안의 더 진한 입력칸 전용 색을 따로 토큰으로 만들었습니다.
+- **FAQ 답변 누락:** 질문만 있던 FAQ에 답변 4개를 넣었습니다(`dl`/`dt`/`dd` 구조, 03번 답변의 "평가 목록"은 링크).
+- **글꼴 변경:** Noto Sans KR → IBM Plex Sans KR
+- **개발 서버 캐시 문제:** 소스의 색을 바꿨는데 개발 서버가 예전 CSS를 내보내서, Turbopack 개발 캐시(`.next/dev`)만 지우고 다시 시작해 해결했습니다.
+- **디자인 방향 변경:** 기본 시안 → MS 스타일 → Slack 스타일 → 안전 파랑. 색은 토큰(`app/globals.css`) 값과 이름만 바꾸는 방식으로 진행했습니다.
+
+## 10. AI 작업 맥락 파일
+
+| 파일 | 역할 |
+|---|---|
+| `AGENTS.md` | 프로젝트 규칙의 원본. 서비스 설명, 기술 스택, 라우팅, 디자인 원칙(색·모서리·제목), 데이터·인터랙션·품질 기준, 작업 규칙(설치·설정 변경·git은 먼저 묻기 등) |
+| `CLAUDE.md` | 한 줄 `@AGENTS.md`. Claude Code가 AGENTS.md를 불러오게 해서 규칙을 한 곳에서만 관리합니다 |
+
+## 11. 실행 방법
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # 개발 서버 http://localhost:3000
+npm run build   # 배포용 빌드
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+윈도우 PowerShell에서는 `npm.cmd install`, `npm.cmd run dev`, `npm.cmd run build`처럼 `npm.cmd`를 씁니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 12. 알려진 사항
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`npm audit` low 3건:** shadcn CLI 내부의 `deepmerge`(→ `@shadcn/registry` → `shadcn`)에서 나옵니다. 컴포넌트를 추가할 때 쓰는 CLI 쪽 코드라 앱 화면 코드에는 영향이 적습니다. `npm audit fix --force`는 shadcn을 1.0.0으로 크게 되돌리는 변경이라 지금 구성(shadcn 4.x)과 맞지 않아 적용하지 않았습니다.
+- **없는 평가·기기 주소**(예: `/assessments/99`, `/preview/abc`): "찾을 수 없음" 화면이 나오지만, Cache Components 스트리밍 때문에 HTTP 상태 코드는 200일 수 있습니다.
