@@ -90,7 +90,24 @@
 
 로그인 화면의 체험 계정 안내는 비밀번호를 뺀 `userClientType`으로 보여주고, 공개용 체험 비밀번호는 `demoPassword` 상수로 따로 둡니다.
 
-## 9. AI 결과를 검토·수정한 기록
+## 9. 수업 내용 적용
+
+| 수업 내용                                                           | 적용한 곳                                                                                                                                                                        |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 객체·배열·조건문·함수·템플릿 리터럴                                 | `lib/service.ts` (`riskLevelLabel` 객체, 검사 오류 배열, `if` 검사, `` `유해·위험요인 ${n}` `` 문구)                                                                             |
+| 회원가입 중복 검사·로그인(유저 \| null)                             | `app/actions.ts`(`signUpAction`, `loginAction`), `lib/repository.ts` `findUserByEmail`, `lib/service.ts` `checkLogin`                                                            |
+| data → repository(조회) → service(판단) 분리                        | `lib/` 폴더 (`data.ts` → `repository.ts` → `service.ts`, 둘을 잇는 곳은 `app/actions.ts`)                                                                                        |
+| `userDataType` / `userClientType`(`Omit`), `import type`, `\| null` | `lib/types.ts`(타입 정의), `import type`은 `lib/data.ts`·`repository.ts`·`service.ts`·`app/actions.ts`, `\| null`은 `repository.ts`의 `find…` 함수들과 `service.ts` `checkLogin` |
+| 화살표 함수·`map`·`filter`·`find`·`reduce`·삼항 연산자              | `lib/repository.ts`(`find`, `filter`), `lib/service.ts`(`map`, `filter`, `reduce`), `app/assessments/page.tsx`(`map`, `find`, 삼항 연산자)                                       |
+| 펼치기·구조분해·`for...of`                                          | `app/actions.ts`(`{ ...form, password: "" }`), `lib/service.ts` `toUserClient`(구조분해)·`getRiskLevelCounts`(`for...of`)                                                        |
+| 제네릭 타입                                                         | `lib/types.ts` `formStateType<T>`                                                                                                                                                |
+| Next.js App Router 동적 라우팅                                      | `app/assessments/[id]/page.tsx`, `app/preview/[device]/page.tsx` (`generateStaticParams`, `notFound()`)                                                                          |
+| shadcn/ui                                                           | `components/ui/` (button, badge, card, input, label, textarea, checkbox)                                                                                                         |
+| 가짜 데이터                                                         | `lib/data.ts` (사용자 2명, 평가 7건)                                                                                                                                             |
+| AI 작업 맥락                                                        | `AGENTS.md`, `CLAUDE.md`(`@AGENTS.md`) — 11절 참고                                                                                                                               |
+| Figma MCP                                                           | 시안 화면 구조·여백을 읽어 구현 (7절 참고)                                                                                                                                       |
+
+## 10. AI 결과를 검토·수정한 기록
 
 AI(Claude Code)가 만든 결과를 확인하고 다음과 같이 고쳤습니다.
 
@@ -102,14 +119,14 @@ AI(Claude Code)가 만든 결과를 확인하고 다음과 같이 고쳤습니�
 - **개발 서버 캐시 문제:** 소스의 색을 바꿨는데 개발 서버가 예전 CSS를 내보내서, Turbopack 개발 캐시(`.next/dev`)만 지우고 다시 시작해 해결했습니다.
 - **디자인 방향 변경:** 기본 시안 → MS 스타일 → Slack 스타일 → 안전 파랑. 색은 토큰(`app/globals.css`) 값과 이름만 바꾸는 방식으로 진행했습니다.
 
-## 10. AI 작업 맥락 파일
+## 11. AI 작업 맥락 파일
 
 | 파일        | 역할                                                                                                                                                       |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AGENTS.md` | 프로젝트 규칙의 원본. 서비스 설명, 기술 스택, 라우팅, 디자인 원칙(색·모서리·제목), 데이터·인터랙션·품질 기준, 작업 규칙(설치·설정 변경·git은 먼저 묻기 등) |
 | `CLAUDE.md` | 한 줄 `@AGENTS.md`. Claude Code가 AGENTS.md를 불러오게 해서 규칙을 한 곳에서만 관리합니다                                                                  |
 
-## 11. 실행 방법
+## 12. 실행 방법
 
 ```bash
 npm install
@@ -119,7 +136,7 @@ npm run build   # 배포용 빌드
 
 윈도우 PowerShell에서는 `npm.cmd install`, `npm.cmd run dev`, `npm.cmd run build`처럼 `npm.cmd`를 씁니다.
 
-## 12. 알려진 사항
+## 13. 알려진 사항
 
 - **`npm audit` low 3건:** shadcn CLI 내부의 `deepmerge`(→ `@shadcn/registry` → `shadcn`)에서 나옵니다. 컴포넌트를 추가할 때 쓰는 CLI 쪽 코드라 앱 화면 코드에는 영향이 적습니다. `npm audit fix --force`는 shadcn을 1.0.0으로 크게 되돌리는 변경이라 지금 구성(shadcn 4.x)과 맞지 않아 적용하지 않았습니다.
-- **없는 평가·기기 주소**(예: `/assessments/99`, `/preview/abc`): "찾을 수 없음" 화면이 나오지만, Cache Components 스트리밍 때문에 HTTP 상태 코드는 200일 수 있습니다.
+- **없는 평가·기기 주소**(예: `/assessments/99`, `/preview/abc`): "찾을 수 없음" 화면과 함께 HTTP **404**를 돌려줍니다. (로컬 `next start`에서는 서버를 켠 뒤 그 주소의 첫 요청만 200이 나오고, 다음 요청부터 404였습니다.)
