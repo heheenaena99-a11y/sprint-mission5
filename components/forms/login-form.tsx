@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 
 import { loginAction } from "@/app/actions";
-import { CheckField } from "@/components/check-field";
 import { FormErrorAlert } from "@/components/form-alert";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -49,8 +48,6 @@ export function LoginForm({ defaultEmail = "" }: { defaultEmail?: string }) {
         autoComplete="current-password"
         error={errorOf("password")}
       />
-      {/* 검사 대상 아님 — 세션 저장도 하지 않음 */}
-      <CheckField id="remember" label="로그인 상태 유지" />
       <SubmitButton pending={pending} className="w-full">
         로그인
       </SubmitButton>

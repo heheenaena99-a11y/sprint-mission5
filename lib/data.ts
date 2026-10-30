@@ -1,4 +1,4 @@
-// 리스크노트 가짜 데이터 — 실제 저장·로그인 기능 없음 (AGENTS.md "데이터")
+// 리스크노트 가짜 데이터 — 평가·체험 계정 (가입 계정은 쿠키에 저장, AGENTS.md "데이터")
 // 타입은 lib/types.ts, 찾기는 lib/repository.ts, 계산은 lib/service.ts
 
 import type {

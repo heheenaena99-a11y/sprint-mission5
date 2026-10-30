@@ -76,12 +76,7 @@ function AssessmentList({
 
   return (
     <>
-      {welcome && (
-        <FormNotice title="로그인했어요(데모)">
-          세션·쿠키는 저장하지 않아요. 새로고침하거나 다른 페이지로 가면 로그인
-          상태가 유지되지 않습니다.
-        </FormNotice>
-      )}
+      {welcome && <FormNotice title="로그인했어요" />}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-col gap-1.5 sm:gap-2">
           <h1 className="text-2xl leading-[1.3] font-bold sm:text-[28px] lg:text-[48px] lg:leading-[1.25]">

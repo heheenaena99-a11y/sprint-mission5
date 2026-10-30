@@ -1,13 +1,22 @@
 "use server";
 
 // 폼 제출(Server Action) — service(판단) → repository(조회) 순서로 검사하고, 통과하면 이동한다.
-// 실제 저장·세션은 없음 (가짜 데이터, AGENTS.md "데이터")
+// 쿠키 쓰기는 여기서만 한다. 새 평가는 저장하지 않음 (AGENTS.md "데이터")
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { findUserByEmail } from "@/lib/repository";
 import {
-  checkLogin,
+  encodeUsers,
+  isUsersCookieTooLarge,
+  sessionCookieName,
+  sessionCookieOptions,
+  usersCookieName,
+  usersCookieOptions,
+} from "@/lib/auth-cookie";
+import { checkLogin, hashPassword } from "@/lib/auth-service";
+import { findUserByEmail, getSignedUpUsers } from "@/lib/repository";
+import {
   validateCreateAssessmentForm,
   validateLoginForm,
   validateSignUpForm,
@@ -41,7 +50,10 @@ export async function loginAction(
   const errors = validateLoginForm(form);
   if (errors.length > 0) return { values, errors, submitCount };
 
-  const signedIn = checkLogin(findUserByEmail(form.email), form.password);
+  const signedIn = await checkLogin(
+    await findUserByEmail(form.email),
+    form.password,
+  );
   if (!signedIn) {
     // 이메일·비밀번호 중 어느 쪽이 틀렸는지 구분하지 않는다
     const message = "이메일 또는 비밀번호가 맞지 않아요";
@@ -55,11 +67,20 @@ export async function loginAction(
     };
   }
 
-  // 세션·쿠키 저장 없이 목록으로 (비밀번호 뺀 signedIn 만 사용)
+  // 비밀번호 뺀 signedIn 만 사용 — 쿠키에는 이메일만 남긴다
+  const cookieStore = await cookies();
+  cookieStore.set(sessionCookieName, signedIn.email, sessionCookieOptions);
   redirect("/assessments?welcome=1");
 }
 
-/** 회원가입 — 형식 검사(service) → 이메일 중복 조회(repository) */
+/** 로그아웃 — 로그인 상태 쿠키만 지운다 (가입 계정은 남김) */
+export async function logoutAction(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(sessionCookieName);
+  redirect("/");
+}
+
+/** 회원가입 — 형식 검사(service) → 이메일 중복 조회(repository) → 쿠키에 저장 */
 export async function signUpAction(
   prev: formStateType<signUpFormType>,
   formData: FormData,
@@ -77,7 +98,7 @@ export async function signUpAction(
   const submitCount = prev.submitCount + 1;
 
   const errors = validateSignUpForm(form);
-  if (errors.length === 0 && findUserByEmail(form.email)) {
+  if (errors.length === 0 && (await findUserByEmail(form.email))) {
     errors.push({
       field: "email",
       label: "이메일",
@@ -86,8 +107,30 @@ export async function signUpAction(
   }
   if (errors.length > 0) return { values, errors, submitCount };
 
-  // 실제로 저장하지 않음 — 로그인 화면에 이메일을 채워 둔다
-  redirect(`/login?email=${encodeURIComponent(form.email)}&joined=1`);
+  const email = form.email.toLowerCase();
+  const usersCookie = encodeUsers([
+    ...(await getSignedUpUsers()),
+    { name: form.name, email, ...(await hashPassword(form.password)) },
+  ]);
+  if (isUsersCookieTooLarge(usersCookie)) {
+    return {
+      values,
+      errors: [
+        {
+          field: "email",
+          label: "이메일",
+          message: "이 브라우저에는 계정을 더 저장할 수 없어요",
+        },
+      ],
+      submitCount,
+    };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(usersCookieName, usersCookie, usersCookieOptions);
+
+  // 로그인 화면에 이메일을 채워 둔다
+  redirect(`/login?email=${encodeURIComponent(email)}&joined=1`);
 }
 
 /** 새 평가 작성 — 필수·범위·중복 검사(service) */

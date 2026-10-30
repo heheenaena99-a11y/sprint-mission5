@@ -58,7 +58,7 @@ async function LoginFromParams({
     <div className="flex flex-col gap-5">
       {joined === "1" && (
         <FormNotice title="회원가입이 완료되었어요">
-          데모라 실제로 저장되지 않아요. 체험 계정으로 로그인해 보세요.
+          가입한 이메일로 로그인해 보세요.
         </FormNotice>
       )}
       <LoginForm key={defaultEmail} defaultEmail={defaultEmail} />

@@ -10,6 +10,15 @@ export type userDataType = {
 /** 화면용 사용자 (비밀번호 제외) */
 export type userClientType = Omit<userDataType, "password">;
 
+/** 쿠키에 저장하는 가입 계정 (비밀번호 원문 대신 salt·바꾼 값) */
+export type userStoredType = userClientType & {
+  passwordSalt: string;
+  passwordHash: string;
+};
+
+/** 로그인 확인 대상 — 체험 계정 또는 가입 계정 */
+export type userAccountType = userDataType | userStoredType;
+
 export type hazardType = {
   order: number;
   step: string;

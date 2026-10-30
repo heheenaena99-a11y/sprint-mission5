@@ -7,8 +7,8 @@ import type {
   loginFormType,
   riskLevelType,
   signUpFormType,
+  userAccountType,
   userClientType,
-  userDataType,
 } from "@/lib/types";
 
 export const riskLevelLabel: Record<riskLevelType, string> = {
@@ -67,7 +67,7 @@ export function getRiskDistribution(assessment: assessmentType): string {
 }
 
 /** 화면용 사용자로 변환 (비밀번호 제외) */
-export function toUserClient(user: userDataType): userClientType {
+export function toUserClient(user: userAccountType): userClientType {
   const { name, email } = user;
   return { name, email };
 }
@@ -257,13 +257,4 @@ export function validateCreateAssessmentForm(
     });
   }
   return errors;
-}
-
-/** 로그인 판단 — 사용자가 없거나(null) 비밀번호가 다르면 null, 맞으면 비밀번호 뺀 정보 */
-export function checkLogin(
-  user: userDataType | null,
-  password: string,
-): userClientType | null {
-  if (!user || user.password !== password) return null;
-  return toUserClient(user);
 }
