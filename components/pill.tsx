@@ -7,6 +7,8 @@ type PillProps = {
   tone?: "brand" | "ink";
   /** 있으면 이동 링크, 없으면 모양만 */
   href?: string;
+  /** 선택된 링크 알약의 aria-current 값 (기본 "true", 페이지 필터는 "page") */
+  current?: "true" | "page";
   className?: string;
   children: React.ReactNode;
 };
@@ -22,11 +24,12 @@ const toneClassName = {
   },
 };
 
-/** 알약 모양 (목록 필터는 모양만, 랜딩 업종은 링크) */
+/** 알약 모양 (href 가 있으면 링크 — 랜딩 업종, 목록 등급 필터, 미리보기 기기) */
 export function Pill({
   selected = false,
   tone = "ink",
   href,
+  current = "true",
   className,
   children,
 }: PillProps) {
@@ -42,7 +45,7 @@ export function Pill({
     return (
       <Link
         href={href}
-        aria-current={selected ? "true" : undefined}
+        aria-current={selected ? current : undefined}
         className={pillClassName}
       >
         {children}

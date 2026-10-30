@@ -12,6 +12,10 @@ type FormFieldProps = {
   autoComplete?: string;
   multiline?: boolean;
   className?: string;
+  /** 처음 채워 둘 값 (검사 실패 후 입력값 유지에 사용) */
+  defaultValue?: string;
+  /** 검사 오류 문구 — 있으면 칸 아래 빨간 글자 + aria-invalid */
+  error?: string;
 };
 
 const boxClassName =
@@ -26,7 +30,14 @@ export function FormField({
   autoComplete,
   multiline = false,
   className,
+  defaultValue,
+  error,
 }: FormFieldProps) {
+  const errorId = `${id}-error`;
+  const invalidProps = error
+    ? { "aria-invalid": true, "aria-describedby": errorId }
+    : {};
+
   return (
     <div className={cn("flex w-full flex-col gap-2", className)}>
       <Label htmlFor={id}>{label}</Label>
@@ -35,7 +46,9 @@ export function FormField({
           id={id}
           name={id}
           placeholder={placeholder}
+          defaultValue={defaultValue}
           className={cn(boxClassName, "min-h-[104px] py-3")}
+          {...invalidProps}
         />
       ) : (
         <Input
@@ -44,8 +57,15 @@ export function FormField({
           type={type}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          defaultValue={defaultValue}
           className={cn(boxClassName, "h-auto py-3")}
+          {...invalidProps}
         />
+      )}
+      {error && (
+        <p id={errorId} className="text-sm text-destructive">
+          {error}
+        </p>
       )}
     </div>
   );

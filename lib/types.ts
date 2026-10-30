@@ -45,3 +45,54 @@ export type deviceType = {
   width: number;
   height: number;
 };
+
+/* ── 폼 입력 (11회차: Server Action 으로 제출, 검사는 service) ── */
+
+export type loginFormType = {
+  email: string;
+  password: string;
+};
+
+export type signUpFormType = {
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  company: string;
+  agreeTerms: boolean;
+  agreePrivacy: boolean;
+};
+
+/** 새 평가 작성 — 유해·위험요인 카드 하나 (빈도·강도는 입력 그대로 문자열) */
+export type hazardFormType = {
+  step: string;
+  hazard: string;
+  frequency: string;
+  severity: string;
+  measure: string;
+};
+
+export type createAssessmentFormType = {
+  title: string;
+  category: string;
+  author: string;
+  date: string;
+  hazards: hazardFormType[];
+  agreeWorkers: boolean;
+  agreeShare: boolean;
+};
+
+/** 검사 오류 하나 — field 는 입력칸 id (경고 상자 목록에서 그 칸으로 이동) */
+export type formErrorType = {
+  field: string;
+  label: string;
+  message: string;
+};
+
+/** useActionState 상태 — 실패 시 입력값(비밀번호 제외)과 오류를 돌려준다 */
+export type formStateType<T> = {
+  values: T;
+  errors: formErrorType[];
+  /** 제출할 때마다 1씩 늘려 폼 key 로 쓴다 (돌려받은 값으로 다시 채우기) */
+  submitCount: number;
+};

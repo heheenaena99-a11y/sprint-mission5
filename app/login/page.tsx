@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { AuthCard } from "@/components/auth-card";
-import { ButtonLink } from "@/components/button-link";
-import { CheckField } from "@/components/check-field";
-import { FormField } from "@/components/form-field";
+import { FormNotice } from "@/components/form-alert";
+import { LoginForm } from "@/components/forms/login-form";
 import { AppTabBar } from "@/components/app-tab-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: "리스크노트에 로그인하고 위험성평가를 작성·관리하세요.",
 };
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }: PageProps<"/login">) {
   const demoUser: userClientType = getDemoUser();
 
   return (
@@ -37,28 +37,31 @@ export default function LoginPage() {
           </div>
         }
       >
-        <FormField
-          id="email"
-          label="이메일"
-          type="email"
-          placeholder="you@company.com"
-          autoComplete="email"
-        />
-        <FormField
-          id="password"
-          label="비밀번호"
-          type="password"
-          placeholder="비밀번호 입력"
-          autoComplete="current-password"
-        />
-        <CheckField id="remember" label="로그인 상태 유지" />
-        {/* 실제 로그인 없음 — 목록으로 이동만 */}
-        <ButtonLink href="/assessments" className="w-full">
-          로그인
-        </ButtonLink>
+        {/* ?email=&joined=1 (회원가입 직후) 은 요청마다 달라서 Suspense 안에서 읽는다 */}
+        <Suspense fallback={<LoginForm />}>
+          <LoginFromParams searchParams={searchParams} />
+        </Suspense>
       </AuthCard>
       <SiteFooter />
       <AppTabBar active="login" />
     </>
+  );
+}
+
+async function LoginFromParams({
+  searchParams,
+}: Pick<PageProps<"/login">, "searchParams">) {
+  const { email, joined } = await searchParams;
+  const defaultEmail = typeof email === "string" ? email : "";
+
+  return (
+    <div className="flex flex-col gap-5">
+      {joined === "1" && (
+        <FormNotice title="회원가입이 완료되었어요">
+          데모라 실제로 저장되지 않아요. 체험 계정으로 로그인해 보세요.
+        </FormNotice>
+      )}
+      <LoginForm key={defaultEmail} defaultEmail={defaultEmail} />
+    </div>
   );
 }

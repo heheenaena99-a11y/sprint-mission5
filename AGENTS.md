@@ -37,7 +37,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 실제 저장·로그인 기능 없음. 가짜 데이터는 lib/data.ts 한 곳에 둔다 (평가 4건, 체험 계정 a@a.com / 1234)
 
 ## 인터랙션
-- 버튼·링크를 누르면 페이지 이동만 한다(next/link). 그 외 동작(필터, 열고 닫기, 저장)은 모양만 만든다.
+- 페이지 이동·목록 등급 필터(?level=)·업종 알약(?industry=)·유해·위험요인 추가/삭제(?hazards=)는 링크(next/link)와 서버의 searchParams로만 처리한다(클라이언트 JS 없음, searchParams 읽는 부분은 Suspense로 감싼다).
+- 폼 3개(새 평가 작성·회원가입·로그인)만 예외로 Server Action + useActionState 클라이언트 컴포넌트를 쓴다. 검사는 service(판단) → repository(조회) 순서, 실패 시 경고 상자(role="alert")와 칸별 오류, 브라우저 기본 검사는 끈다(noValidate).
+- 실제 저장·세션은 없다. 성공 화면에 "데모라 실제로 저장되지 않아요"를 표시한다. 열고 닫기는 모양만 만든다.
 
 ## 품질
 - 모바일·데스크톱에서 잘리거나 겹치지 않게 반응형
