@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon">
+<path id="Vector" d="M6 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4C4 2.89543 4.89543 2 6 2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#1D4ED8"/>
+<path id="Vector_2" d="M8 6H16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#1D4ED8"/>
+<circle id="Ellipse" cx="8" cy="11" r="1" fill="#1D4ED8"/>
+<circle id="Ellipse_2" cx="12" cy="11" r="1" fill="#1D4ED8"/>
+<circle id="Ellipse_3" cx="16" cy="11" r="1" fill="#1D4ED8"/>
+<circle id="Ellipse_4" cx="8" cy="15" r="1" fill="#1D4ED8"/>
+<circle id="Ellipse_5" cx="12" cy="15" r="1" fill="#1D4ED8"/>
+<path id="Vector_3" d="M16 15V18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#1D4ED8"/>
+<path id="Vector_4" d="M8 18H12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#1D4ED8"/>
+</g>
+</svg>
